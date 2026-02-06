@@ -15,9 +15,16 @@ class DoctorSeeder extends Seeder
     {
         // Create a doctor account
         User::create([
-            'name' => 'Dr. Ron Arvene Flordeliz',
+            'name' => 'Ron Arvene Flordeliz',
             'email' => '2235122@slu.edu.ph',
             'password' => Hash::make('pass1234'),
+            'role' => 'doctor',
+        ]);
+
+    User::create([
+            'name' => 'John Doe',
+            'email' => 'jdoe@slu.edu.ph',   
+            'password'=> Hash::make('jdoe1234'),
             'role' => 'doctor',
         ]);
     }
