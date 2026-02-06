@@ -3,17 +3,20 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('public.home');
 })->name('public.home');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = Auth::user();
+    
+    if ($user->role === 'doctor') {
+        return view('doctor.dashboard');
+    } else {
+        return view('patient.dashboard');
+    }
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

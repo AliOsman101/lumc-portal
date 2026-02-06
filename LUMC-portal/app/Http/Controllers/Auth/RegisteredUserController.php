@@ -29,9 +29,6 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        
-
-    
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
@@ -42,21 +39,8 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'patient',
         ]);
-
-        $user->patientProfile()->create([
-    'first_name' => $request->first_name,
-    'last_name' => $request->last_name,
-    'birthdate' => $request->birthdate,
-    'sex' => $request->sex,
-    'contact_number' => $request->contact_number,
-    'address_line' => $request->address_line,
-    'barangay' => $request->barangay,
-    'city' => $request->city,
-    'province' => $request->province,
-    'zip_code' => $request->zip_code,
-]);
-
 
         event(new Registered($user));
 
