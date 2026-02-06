@@ -18,23 +18,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-    'user_id',
-    'first_name',
-    'last_name',
-    'birthdate',
-    'sex',
-    'contact_number',
-    'address_line',
-    'barangay',
-    'city',
-    'province',
-    'zip_code',
-];
+        'name',
+        'email',
+        'password',
+    ];
 
-public function user()
-{
-    return $this->belongsTo(\App\Models\User::class);
-}
+    /**
+     * Get the patient profile associated with this user.
+     */
+    public function patientProfile()
+    {
+        return $this->hasOne(PatientProfile::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -58,10 +53,4 @@ public function user()
             'password' => 'hashed',
         ];
     }
-
-    public function patientProfile()
-{
-    return $this->hasOne(\App\Models\PatientProfile::class);
-}
-
 }
