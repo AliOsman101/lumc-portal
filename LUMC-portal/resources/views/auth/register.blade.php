@@ -288,8 +288,11 @@
     cursor:pointer;
 
     /* softer medical red */
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    /* background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color:#fff; */
+    background: linear-gradient(135deg, #5cc93a 0%, #5cc93a 100%);
     color:#fff;
+    
 
     /* subtle shadow (not aggressive) */
     /* box-shadow: 0 10px 18px rgba(220,38,38,.16); */
