@@ -44,42 +44,32 @@
 
     <!-- Header -->
     <header class="bg-white shadow-md sticky top-0 z-50">
-        <div
-            class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="w-full px-6 py-3 flex flex-row items-center justify-between border-b border-gray-100">
+
             <div class="flex items-center gap-3">
-                <img
-                    src="{{ asset('images/LUMC_LOGO.png') }}"
-                    alt="logo" class="w-16 h-16">
-                <div>
-                    <h1
-                        class="text-lg md:text-xl font-bold text-blue-900 leading-tight">LA
-                        UNION MEDICAL CENTER</h1>
-                </div>
+                <img src="{{ asset('images/LUMC_LOGO.png') }}" alt="logo" class="w-14 h-14">
+                <h1 class="text-lg md:text-xl font-bold text-blue-900 leading-tight">
+                    LA UNION MEDICAL CENTER
+                </h1>
             </div>
 
-            <nav
-                class="hidden lg:flex items-center gap-6 font-semibold text-sm">
-                <a href="#home"
-                    class="text-blue-900 hover:text-red-600 transition">HOME</a>
-                <a href="#about"
-                    class="text-blue-900 hover:text-red-600 transition">ABOUT</a>
-                <a href="#mission"
-                    class="text-blue-900 hover:text-red-600 transition">MISSION
-                    & VISION</a>
-                <a href="#services"
-                    class="text-blue-900 hover:text-red-600 transition">DEPARTMENTS</a>
-                <a href="#contact"
-                    class="text-blue-900 hover:text-red-600 transition">CONTACT</a>
-                <button onclick="openLoginModal()"
-                    class="bg-red-600 text-white px-5 py-2 rounded-md hover:bg-blue-900 transition shadow-lg">LOGIN</button>
+            <nav class="hidden lg:flex items-center gap-8 font-semibold text-sm">
+                <a href="#home" class="text-blue-900 hover:text-red-600 transition">HOME</a>
+                <a href="#about" class="text-blue-900 hover:text-red-600 transition">ABOUT</a>
+                <a href="#mission" class="text-blue-900 hover:text-red-600 transition">MISSION & VISION</a>
+                <a href="#services" class="text-blue-900 hover:text-red-600 transition">DEPARTMENTS</a>
+                <a href="#contact" class="text-blue-900 hover:text-red-600 transition">CONTACT</a>
+                <button onclick="openLoginModal()" class="bg-red-600 text-white px-5 py-2 rounded-md hover:bg-blue-900 transition shadow-lg">
+                    LOGIN
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <button class="lg:hidden text-2xl text-blue-900">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <img src="{{ asset('images/BagongPilipinas.png') }}" alt="logo" class="w-14 h-14">
+                </div>
             </nav>
-
-            <button class="lg:hidden text-2xl text-blue-900">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <img src="{{ asset('images/BagongPilipinas.png') }}"
-                alt="logo" class="w-16 h-16">
         </div>
     </header>
 

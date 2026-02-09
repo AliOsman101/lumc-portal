@@ -9,11 +9,6 @@
     <link
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -48,7 +43,7 @@
 
     <div class="flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-lg min-h-screen">
+        <aside class="w-64 bg-white border-t-2 shadow-md min-h-screen">
             <nav class="p-6 space-y-4">
                 <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-900 text-white rounded-lg">
                     <i class="fas fa-home"></i>
@@ -158,8 +153,8 @@
                     <div class="p-6 border-b">
                         <h3 class="text-xl font-bold text-blue-900">Upcoming Appointments</h3>
                     </div>
-                    <div class="p-6 space-y-4">
-                        <div class="border-l-4 border-green-600 pl-4 py-3">
+                    <div class="p-6 space-y-4 ">
+                        <div class="border-black border-opacity-10 border rounded-lg shadow-sm pl-4 py-3">
                             <p class="font-semibold text-gray-900">Dr. Ana Reyes - Cardiology</p>
                             <p class="text-sm text-gray-600">
                                 <i class="fas fa-calendar mr-2"></i>February 12, 2026 - 2:00 PM
@@ -170,7 +165,7 @@
                             </div>
                         </div>
 
-                        <div class="border-l-4 border-green-600 pl-4 py-3">
+                        <div class="border-black border-opacity-10 border rounded-lg shadow-sm pl-4 py-3">
                             <p class="font-semibold text-gray-900">Dr. Juan Santos - General Check-up</p>
                             <p class="text-sm text-gray-600">
                                 <i class="fas fa-calendar mr-2"></i>February 18, 2026 - 10:00 AM

@@ -9,35 +9,6 @@
     <link
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         rel="stylesheet">
-    <style>
-        :root {
-            --lu-blue: #1a3a8a;
-            --lu-red: #dc2626;
-            --lu-gold: #facc15;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            scroll-behavior: smooth;
-        }
-
-        .hero-gradient {
-            background: linear-gradient(135deg, rgba(26, 58, 138, 0.9) 0%, rgba(30, 64, 175, 0.7) 100%);
-        }
-
-        .agkaysa-font {
-            font-style: italic;
-            font-weight: 800;
-        }
-
-        .bg-gold {
-            background-color: #facc15;
-        }
-
-        .text-lu-blue {
-            color: #1a3a8a;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800">
