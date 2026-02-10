@@ -15,7 +15,7 @@
 
     <!-- Top Navigation -->
     <header class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="w-full px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <img src="{{ asset('images/LUMC_LOGO.png') }}" alt="logo" class="w-12 h-12">
                 <h1 class="text-xl font-bold text-blue-900">LUMC - Patient Portal</h1>

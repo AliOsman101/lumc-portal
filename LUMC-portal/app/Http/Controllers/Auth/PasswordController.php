@@ -3,27 +3,60 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Password as PasswordFacade;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Http\RedirectResponse;
 
 class PasswordController extends Controller
 {
     /**
-     * Update the user's password.
+     * Display the password reset link request view.
+     */
+    public function create()
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Handle sending of reset link.
+     */
+    public function store(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status == Password::RESET_LINK_SENT) {
+            return back()->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)]);
+    }
+
+    /**
+     * Update the authenticated user's password.
      */
     public function update(Request $request): RedirectResponse
     {
-        $validated = $request->validateWithBag('updatePassword', [
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|confirmed|min:6',
         ]);
 
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
+        $user = $request->user();
 
-        return back()->with('status', 'password-updated');
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return redirect('/profile')
+                ->withErrors(['current_password' => 'The provided password does not match our records.'], 'updatePassword');
+        }
+
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+
+        return redirect('/profile');
     }
 }

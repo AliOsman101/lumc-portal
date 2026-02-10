@@ -9,18 +9,13 @@
     <link
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
         rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50">
 
     <!-- Top Navigation -->
     <header class="bg-white shadow-md">
-        <div class="container w-full px-4 py-4 flex justify-between items-center">
+        <div class="w-full px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <img src="{{ asset('images/LUMC_LOGO.png') }}" alt="logo" class="w-12 h-12">
                 <h1 class="text-xl font-bold text-blue-900">LUMC - Doctor Portal</h1>
@@ -48,8 +43,8 @@
 
     <div class="flex">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white shadow-lg min-h-screen">
-            <nav class="p-6 space-y-4">
+        <aside class="w-64 bg-white border-t-2 shadow-md min-h-screen">
+              <nav class="p-6 space-y-4">
                 <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-900 text-white rounded-lg">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
