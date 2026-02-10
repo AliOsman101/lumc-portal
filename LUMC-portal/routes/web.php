@@ -26,5 +26,8 @@ Route::get('/patient/personal-profile', function () {
     return view('patient.profile');
 })->name('patient.personal-profile');
 
+Route::get('/doctor/dashboard', function () {
+    return view('doctor.dashboard');
+})->name('doctor.dashboard');
 
 require __DIR__.'/auth.php';
