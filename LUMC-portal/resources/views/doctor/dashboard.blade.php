@@ -22,7 +22,7 @@
         /* Modal */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
         .modal.show { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 700px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: slideDown 0.3s; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 800px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: slideDown 0.3s; max-height: 90vh; overflow-y: auto; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         /* Form */
@@ -34,12 +34,18 @@
         .success-msg { background: #10b981; color: white; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
         .success-msg.show { display: flex; align-items: center; gap: 12px; animation: slideDown 0.3s; }
         
-        /* Calendar */
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .calendar-day { padding: 16px; text-align: center; border-radius: 8px; border: 2px solid #e5e7eb; cursor: pointer; transition: all 0.2s; }
-        .calendar-day:hover { border-color: #16a34a; background: #f0fdf4; }
-        .calendar-day.selected { background: #16a34a; color: white; border-color: #16a34a; }
-        .calendar-day.has-schedule { background: #dbeafe; border-color: #3b82f6; }
+        /* Notification Badge */
+        .notif-badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; }
+        
+        /* Image Preview */
+        .image-preview { max-width: 100%; height: auto; border-radius: 8px; border: 2px solid #e5e7eb; }
+        
+        /* Status Pills */
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-in-progress { background: #dbeafe; color: #1e40af; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-reviewed { background: #e0e7ff; color: #3730a3; }
+        .status-urgent { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
@@ -49,7 +55,9 @@
         <aside class="sidebar w-64 text-white fixed h-full overflow-y-auto">
             <div class="p-6 border-b border-white/10">
                 <div class="flex items-center gap-3">
-                    <img src="{{ asset('images/LUMC_LOGO.png') }}" alt="LUMC" class="h-12 w-12">
+                    <div class="h-12 w-12 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-green-600 font-black text-xl">L</span>
+                    </div>
                     <div>
                         <h2 class="font-black text-lg">LUMC</h2>
                         <p class="text-xs text-white/70">Doctor Portal</p>
@@ -64,6 +72,10 @@
                 <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" onclick="showTab('appointments')">
                     <i class="fas fa-calendar-alt w-5"></i><span>My Appointments</span>
                 </div>
+                <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold relative" onclick="showTab('diagnostic-orders')">
+                    <i class="fas fa-x-ray w-5"></i><span>Diagnostic Orders</span>
+                    <span class="notif-badge" id="ordersNotifBadge">3</span>
+                </div>
                 <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" onclick="showTab('patients')">
                     <i class="fas fa-users w-5"></i><span>My Patients</span>
                 </div>
@@ -73,16 +85,13 @@
                 <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" onclick="showTab('schedule')">
                     <i class="fas fa-clock w-5"></i><span>My Schedule</span>
                 </div>
-                <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" onclick="showTab('rotation')">
-                    <i class="fas fa-hospital w-5"></i><span>Hospital Rotation</span>
-                </div>
                 <div class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" onclick="showTab('prescriptions')">
                     <i class="fas fa-prescription w-5"></i><span>Prescriptions</span>
                 </div>
             </nav>
 
             <div class="p-4 border-t border-white/10 mt-auto">
-                <a href="{{ route('home') }}" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold">
+                <a href="#" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold">
                     <i class="fas fa-sign-out-alt w-5"></i><span>Logout</span>
                 </a>
             </div>
@@ -99,7 +108,7 @@
                         <p class="text-sm text-gray-500">Dr. Ricardo Santos - Internal Medicine</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <button class="relative p-2 hover:bg-gray-100 rounded-full">
+                        <button class="relative p-2 hover:bg-gray-100 rounded-full" onclick="showNotifications()">
                             <i class="fas fa-bell text-gray-600"></i>
                             <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         </button>
@@ -127,16 +136,16 @@
                 <!-- TAB 1: Dashboard -->
                 <div id="tab-dashboard" class="tab-content active">
                     <!-- Welcome Banner -->
-                    <div class="card p-6 bg-gradient-to-r from-[#16a34a] to-[#22c55e] text-white mb-6">
+                    <div class="card p-6 bg-gradient-to-r from-[#1D4ED8] to-[#22c55e] text-white mb-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h2 class="text-2xl font-bold mb-2">Welcome, Dr. Santos! 👨‍⚕️</h2>
                                 <p class="text-white/90">You have 5 appointments scheduled for today.</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-white/80">{{ date('l') }}</p>
-                                <p class="text-lg font-bold">{{ date('F d, Y') }}</p>
-                                <p class="text-sm text-white/80">{{ date('h:i A') }}</p>
+                                <p class="text-sm text-white/80">Friday</p>
+                                <p class="text-lg font-bold">February 13, 2026</p>
+                                <p class="text-sm text-white/80">2:30 PM</p>
                             </div>
                         </div>
                     </div>
@@ -157,12 +166,12 @@
                         <div class="card p-6 border-l-4 border-l-yellow-500">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-user-clock text-yellow-600 text-xl"></i>
+                                    <i class="fas fa-x-ray text-yellow-600 text-xl"></i>
                                 </div>
-                                <span class="text-3xl font-black text-gray-900">3</span>
+                                <span class="text-3xl font-black text-gray-900">7</span>
                             </div>
-                            <h3 class="text-sm font-bold text-gray-600 uppercase">Waiting Patients</h3>
-                            <p class="text-xs text-gray-500 mt-1">In OPD waiting area</p>
+                            <h3 class="text-sm font-bold text-gray-600 uppercase">Pending Orders</h3>
+                            <p class="text-xs text-gray-500 mt-1">3 awaiting results</p>
                         </div>
 
                         <div class="card p-6 border-l-4 border-l-green-500">
@@ -170,10 +179,10 @@
                                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-clipboard-check text-green-600 text-xl"></i>
                                 </div>
-                                <span class="text-3xl font-black text-gray-900">8</span>
+                                <span class="text-3xl font-black text-gray-900">3</span>
                             </div>
-                            <h3 class="text-sm font-bold text-gray-600 uppercase">Pending Approvals</h3>
-                            <p class="text-xs text-gray-500 mt-1">Nurse submissions</p>
+                            <h3 class="text-sm font-bold text-gray-600 uppercase">Results Ready</h3>
+                            <p class="text-xs text-gray-500 mt-1">Needs your review</p>
                         </div>
 
                         <div class="card p-6 border-l-4 border-l-red-500">
@@ -181,32 +190,32 @@
                                 <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                                 </div>
-                                <span class="text-3xl font-black text-gray-900">2</span>
+                                <span class="text-3xl font-black text-gray-900">1</span>
                             </div>
-                            <h3 class="text-sm font-bold text-gray-600 uppercase">Urgent Alerts</h3>
+                            <h3 class="text-sm font-bold text-gray-600 uppercase">Urgent Orders</h3>
                             <p class="text-xs text-gray-500 mt-1">Requires attention</p>
                         </div>
                     </div>
 
                     <!-- Quick Actions -->
                     <div class="grid md:grid-cols-4 gap-4">
-                        <button onclick="showTab('appointments')" class="card p-6 hover:shadow-xl transition text-center">
+                        <button onclick="showTab('diagnostic-orders')" class="card p-6 hover:shadow-xl transition text-center">
                             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-calendar-plus text-blue-600 text-2xl"></i>
+                                <i class="fas fa-x-ray text-blue-600 text-2xl"></i>
                             </div>
-                            <h4 class="font-bold text-gray-900">View Schedule</h4>
+                            <h4 class="font-bold text-gray-900">Order X-ray</h4>
                         </button>
-                        <button onclick="showTab('approvals')" class="card p-6 hover:shadow-xl transition text-center">
-                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-clipboard-check text-yellow-600 text-2xl"></i>
-                            </div>
-                            <h4 class="font-bold text-gray-900">Approvals</h4>
-                        </button>
-                        <button onclick="showTab('prescriptions')" class="card p-6 hover:shadow-xl transition text-center">
+                        <button onclick="showTab('diagnostic-orders'); setTimeout(() => document.getElementById('resultsReadyTab').click(), 100)" class="card p-6 hover:shadow-xl transition text-center">
                             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-prescription text-green-600 text-2xl"></i>
+                                <i class="fas fa-file-medical text-green-600 text-2xl"></i>
                             </div>
-                            <h4 class="font-bold text-gray-900">Prescriptions</h4>
+                            <h4 class="font-bold text-gray-900">Review Results</h4>
+                        </button>
+                        <button onclick="showTab('appointments')" class="card p-6 hover:shadow-xl transition text-center">
+                            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-calendar-check text-yellow-600 text-2xl"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-900">Appointments</h4>
                         </button>
                         <button onclick="showTab('patients')" class="card p-6 hover:shadow-xl transition text-center">
                             <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -220,7 +229,7 @@
                 <!-- TAB 2: My Appointments -->
                 <div id="tab-appointments" class="tab-content">
                     <div class="card p-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Today's Appointments - {{ date('F d, Y') }}</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Today's Appointments - February 13, 2026</h3>
 
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -282,29 +291,214 @@
                                             </button>
                                         </td>
                                     </tr>
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 px-4 text-sm font-semibold">3:30 PM</td>
-                                        <td class="py-4 px-4">
-                                            <div class="font-semibold text-gray-900">Pedro Garcia Aquino</div>
-                                            <div class="text-xs text-gray-500">ID: P-2024-004</div>
-                                        </td>
-                                        <td class="py-4 px-4 text-sm text-gray-600">Lab Review</td>
-                                        <td class="py-4 px-4">
-                                            <span class="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-bold rounded-full">Scheduled</span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <button onclick="viewPatient('Pedro Garcia Aquino', 'P-2024-004', 'O+', 'Diabetes Follow-up')" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
-                                                View Details
-                                            </button>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 3: My Patients -->
+                <!-- TAB 3: DIAGNOSTIC ORDERS (NEW) -->
+                <div id="tab-diagnostic-orders" class="tab-content">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900">Diagnostic Orders - X-ray</h3>
+                        <button onclick="openCreateOrderModal()" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Create X-ray Order
+                        </button>
+                    </div>
+
+                    <!-- Sub-tabs for Orders -->
+                    <div class="card p-4 mb-6">
+                        <div class="flex gap-2 overflow-x-auto">
+                            <button onclick="filterOrders('all')" class="orders-filter-btn active px-6 py-3 font-bold rounded-lg transition" data-filter="all">
+                                All Orders <span class="ml-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-full">7</span>
+                            </button>
+                            <button onclick="filterOrders('pending')" class="orders-filter-btn px-6 py-3 font-bold rounded-lg transition" data-filter="pending">
+                                Pending <span class="ml-2 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">2</span>
+                            </button>
+                            <button onclick="filterOrders('in-progress')" class="orders-filter-btn px-6 py-3 font-bold rounded-lg transition" data-filter="in-progress">
+                                In Progress <span class="ml-2 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">2</span>
+                            </button>
+                            <button id="resultsReadyTab" onclick="filterOrders('completed')" class="orders-filter-btn px-6 py-3 font-bold rounded-lg transition" data-filter="completed">
+                                Results Ready <span class="ml-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">3</span>
+                            </button>
+                            <button onclick="filterOrders('reviewed')" class="orders-filter-btn px-6 py-3 font-bold rounded-lg transition" data-filter="reviewed">
+                                Reviewed <span class="ml-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">0</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Orders List -->
+                    <div class="space-y-4" id="ordersList">
+                        
+                        <!-- Order 1 - COMPLETED (Results Ready) -->
+                        <div class="card p-6 border-l-4 border-l-green-500 order-item" data-status="completed">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-x-ray text-green-600 text-2xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h4 class="text-lg font-bold text-gray-900">Chest X-ray (PA & Lateral)</h4>
+                                            <span class="px-3 py-1 status-completed text-xs font-bold rounded-full">Results Ready</span>
+                                            <span class="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-bold rounded-full">
+                                                <i class="fas fa-bell"></i> NEW
+                                            </span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4 text-sm mb-3">
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Patient</p>
+                                                <p class="font-bold text-gray-900">Maria Clara Santos</p>
+                                                <p class="text-xs text-gray-500">P-2024-001 • 45 yrs, Female</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Clinical Indication</p>
+                                                <p class="text-gray-700">Chronic cough, rule out pneumonia</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                                            <span><i class="fas fa-calendar mr-1"></i> Ordered: Feb 12, 2026 10:30 AM</span>
+                                            <span><i class="fas fa-check-circle mr-1 text-green-600"></i> Completed: Feb 13, 2026 8:15 AM</span>
+                                            <span><i class="fas fa-user-nurse mr-1"></i> Rad Tech: John Mendoza</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="reviewResults('ORD-2024-001', 'Maria Clara Santos', 'Chest X-ray')" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-file-medical"></i> Review Results
+                                    </button>
+                                    <button onclick="viewOrderDetails('ORD-2024-001')" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-eye"></i> View Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order 2 - IN PROGRESS -->
+                        <div class="card p-6 border-l-4 border-l-blue-500 order-item" data-status="in-progress">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-x-ray text-blue-600 text-2xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h4 class="text-lg font-bold text-gray-900">Lumbar Spine X-ray (AP & Lateral)</h4>
+                                            <span class="px-3 py-1 status-in-progress text-xs font-bold rounded-full">In Progress</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4 text-sm mb-3">
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Patient</p>
+                                                <p class="font-bold text-gray-900">Jose Rizal Cruz</p>
+                                                <p class="text-xs text-gray-500">P-2024-002 • 52 yrs, Male</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Clinical Indication</p>
+                                                <p class="text-gray-700">Lower back pain, possible herniation</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                                            <span><i class="fas fa-calendar mr-1"></i> Ordered: Feb 13, 2026 9:00 AM</span>
+                                            <span><i class="fas fa-user-nurse mr-1"></i> Coordinated by: Nurse Teresa</span>
+                                            <span class="text-blue-600 font-bold"><i class="fas fa-hourglass-half mr-1"></i> Patient in Radiology Dept</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="viewOrderDetails('ORD-2024-002')" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-eye"></i> View Order
+                                    </button>
+                                    <button onclick="cancelOrder('ORD-2024-002')" class="px-6 py-3 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order 3 - PENDING -->
+                        <div class="card p-6 border-l-4 border-l-yellow-500 order-item" data-status="pending">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <div class="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-x-ray text-yellow-600 text-2xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h4 class="text-lg font-bold text-gray-900">Chest X-ray (PA View)</h4>
+                                            <span class="px-3 py-1 status-pending text-xs font-bold rounded-full">Pending</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4 text-sm mb-3">
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Patient</p>
+                                                <p class="font-bold text-gray-900">Ana Reyes Dela Cruz</p>
+                                                <p class="text-xs text-gray-500">P-2024-003 • 38 yrs, Female</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Clinical Indication</p>
+                                                <p class="text-gray-700">Pre-operative clearance, scheduled surgery</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                                            <span><i class="fas fa-calendar mr-1"></i> Ordered: Feb 13, 2026 1:45 PM</span>
+                                            <span class="text-yellow-600 font-bold"><i class="fas fa-clock mr-1"></i> Awaiting nurse coordination</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="viewOrderDetails('ORD-2024-003')" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-eye"></i> View Order
+                                    </button>
+                                    <button onclick="cancelOrder('ORD-2024-003')" class="px-6 py-3 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order 4 - COMPLETED (Results Ready) -->
+                        <div class="card p-6 border-l-4 border-l-green-500 order-item" data-status="completed">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-start gap-4 flex-1">
+                                    <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-x-ray text-green-600 text-2xl"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h4 class="text-lg font-bold text-gray-900">Hand X-ray (AP & Oblique)</h4>
+                                            <span class="px-3 py-1 status-completed text-xs font-bold rounded-full">Results Ready</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4 text-sm mb-3">
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Patient</p>
+                                                <p class="font-bold text-gray-900">Pedro Garcia Aquino</p>
+                                                <p class="text-xs text-gray-500">P-2024-004 • 29 yrs, Male</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-500 text-xs uppercase font-bold mb-1">Clinical Indication</p>
+                                                <p class="text-gray-700">Trauma, possible fracture</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-xs text-gray-600">
+                                            <span><i class="fas fa-calendar mr-1"></i> Ordered: Feb 13, 2026 11:00 AM</span>
+                                            <span><i class="fas fa-check-circle mr-1 text-green-600"></i> Completed: Feb 13, 2026 2:00 PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <button onclick="reviewResults('ORD-2024-004', 'Pedro Garcia Aquino', 'Hand X-ray')" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-file-medical"></i> Review Results
+                                    </button>
+                                    <button onclick="viewOrderDetails('ORD-2024-004')" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap">
+                                        <i class="fas fa-eye"></i> View Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TAB 4: My Patients -->
                 <div id="tab-patients" class="tab-content">
                     <div class="card p-6">
                         <div class="flex items-center justify-between mb-6">
@@ -349,7 +543,7 @@
                                 </div>
                             </div>
 
-                            <!-- More patient cards... -->
+                            <!-- Patient Card 3 -->
                             <div class="card p-5 border-2 border-gray-200 hover:border-green-500 hover:shadow-lg transition cursor-pointer doctor-patient-card" onclick="viewPatient('Ana Reyes Dela Cruz', 'P-2024-003', 'B+', 'Hypertension')">
                                 <div class="flex items-start gap-3">
                                     <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -370,7 +564,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: Pending Approvals -->
+                <!-- TAB 5: Pending Approvals -->
                 <div id="tab-approvals" class="tab-content">
                     <div class="card p-6">
                         <h3 class="text-2xl font-bold text-gray-900 mb-6">Pending Approvals (8)</h3>
@@ -415,31 +609,11 @@
                                     </button>
                                 </div>
                             </div>
-
-                            <!-- Approval 3 -->
-                            <div class="flex items-center gap-4 p-5 bg-yellow-50 border-2 border-yellow-500 rounded-lg" id="approval-3">
-                                <div class="w-14 h-14 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-flask text-yellow-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-gray-900 mb-1">Lab Test Order - Ana Dela Cruz</h4>
-                                    <p class="text-sm text-gray-600">Submitted by: Nurse Teresa Gomez | 2 hours ago</p>
-                                    <p class="text-sm text-gray-700 mt-2"><strong>Tests:</strong> CBC, Urinalysis, Blood Chemistry</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="approveSubmission('approval-3', 'Lab Test Order for Ana Dela Cruz')" class="px-6 py-3 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700">
-                                        <i class="fas fa-check mr-1"></i> Approve
-                                    </button>
-                                    <button onclick="rejectSubmission('approval-3', 'Lab Test Order for Ana Dela Cruz')" class="px-6 py-3 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700">
-                                        <i class="fas fa-times mr-1"></i> Reject
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 5: My Schedule -->
+                <!-- TAB 6: My Schedule -->
                 <div id="tab-schedule" class="tab-content">
                     <div class="card p-6">
                         <div class="flex items-center justify-between mb-6">
@@ -449,8 +623,7 @@
                             </button>
                         </div>
 
-                        <!-- Weekly Schedule Table -->
-                        <div class="overflow-x-auto mb-6">
+                        <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead>
                                     <tr class="border-b-2 border-gray-200">
@@ -461,110 +634,19 @@
                                         <th class="text-left py-3 px-4 font-bold text-gray-900">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="scheduleTable">
+                                <tbody>
                                     <tr class="border-b border-gray-100 hover:bg-gray-50">
                                         <td class="py-4 px-4 font-semibold">Monday</td>
                                         <td class="py-4 px-4">8:00 AM - 5:00 PM</td>
                                         <td class="py-4 px-4">LUMC - OPD Building</td>
                                         <td class="py-4 px-4"><span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">Clinic Hours</span></td>
                                         <td class="py-4 px-4">
-                                            <button onclick="editScheduleEntry('Monday')" class="text-blue-600 hover:underline text-sm font-bold mr-3">Edit</button>
-                                            <button onclick="deleteScheduleEntry('Monday')" class="text-red-600 hover:underline text-sm font-bold">Delete</button>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 px-4 font-semibold">Wednesday</td>
-                                        <td class="py-4 px-4">8:00 AM - 12:00 PM</td>
-                                        <td class="py-4 px-4">LUMC - Main Hospital</td>
-                                        <td class="py-4 px-4"><span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">Ward Rounds</span></td>
-                                        <td class="py-4 px-4">
-                                            <button onclick="editScheduleEntry('Wednesday')" class="text-blue-600 hover:underline text-sm font-bold mr-3">Edit</button>
-                                            <button onclick="deleteScheduleEntry('Wednesday')" class="text-red-600 hover:underline text-sm font-bold">Delete</button>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                        <td class="py-4 px-4 font-semibold">Friday</td>
-                                        <td class="py-4 px-4">2:00 PM - 6:00 PM</td>
-                                        <td class="py-4 px-4">LUMC - OPD Building</td>
-                                        <td class="py-4 px-4"><span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">Clinic Hours</span></td>
-                                        <td class="py-4 px-4">
-                                            <button onclick="editScheduleEntry('Friday')" class="text-blue-600 hover:underline text-sm font-bold mr-3">Edit</button>
-                                            <button onclick="deleteScheduleEntry('Friday')" class="text-red-600 hover:underline text-sm font-bold">Delete</button>
+                                            <button class="text-blue-600 hover:underline text-sm font-bold mr-3">Edit</button>
+                                            <button class="text-red-600 hover:underline text-sm font-bold">Delete</button>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 6: Hospital Rotation -->
-                <div id="tab-rotation" class="tab-content">
-                    <div class="card p-6">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-2xl font-bold text-gray-900">Hospital Rotation Schedule</h3>
-                            <button onclick="addRotation()" class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
-                                <i class="fas fa-plus mr-2"></i> Add Rotation
-                            </button>
-                        </div>
-
-                        <!-- Current & Next Rotation -->
-                        <div class="grid md:grid-cols-2 gap-6 mb-6">
-                            <div class="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <i class="fas fa-hospital text-3xl"></i>
-                                    <div>
-                                        <h4 class="font-bold text-lg">Current Location</h4>
-                                        <p class="text-sm text-white/90">Active Assignment</p>
-                                    </div>
-                                </div>
-                                <div class="text-2xl font-black mb-2">La Union Medical Center</div>
-                                <p class="text-white/90 mb-1">Main Hospital, Agoo, La Union</p>
-                                <p class="text-sm text-white/80">
-                                    <i class="fas fa-calendar mr-1"></i> February 1 - 15, 2024
-                                </p>
-                            </div>
-
-                            <div class="card p-6 border-2 border-blue-500">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <i class="fas fa-hospital text-blue-600 text-3xl"></i>
-                                    <div>
-                                        <h4 class="font-bold text-lg text-gray-900">Next Rotation</h4>
-                                        <p class="text-sm text-gray-500">Upcoming Assignment</p>
-                                    </div>
-                                </div>
-                                <div class="text-2xl font-black text-gray-900 mb-2">Ilocos Training Hospital</div>
-                                <p class="text-gray-600 mb-1">Batac City, Ilocos Norte</p>
-                                <p class="text-sm text-gray-500">
-                                    <i class="fas fa-calendar mr-1"></i> February 16 - 29, 2024
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Rotation History -->
-                        <h4 class="text-xl font-bold text-gray-900 mb-4">Rotation History</h4>
-                        <div class="space-y-3" id="rotationHistory">
-                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-hospital text-blue-600"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h5 class="font-bold text-gray-900">La Union Medical Center</h5>
-                                    <p class="text-sm text-gray-500">February 1 - 15, 2024</p>
-                                </div>
-                                <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">Current</span>
-                            </div>
-
-                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-hospital text-purple-600"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h5 class="font-bold text-gray-900">Divine Word Hospital</h5>
-                                    <p class="text-sm text-gray-500">January 15 - 31, 2024</p>
-                                </div>
-                                <span class="px-3 py-1 bg-gray-200 text-gray-800 text-xs font-bold rounded-full">Completed</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -580,7 +662,6 @@
                         </div>
 
                         <div class="space-y-4">
-                            <!-- Prescription 1 -->
                             <div class="card p-5 border-2 border-gray-200 hover:shadow-lg transition">
                                 <div class="flex items-start gap-4">
                                     <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
@@ -596,29 +677,7 @@
                                         </p>
                                         <p class="text-xs text-gray-500">Diagnosis: Type 2 Diabetes Mellitus</p>
                                     </div>
-                                    <button onclick="viewPrescription('Maria Clara Santos', 'Metformin 500mg')" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
-                                        View
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Prescription 2 -->
-                            <div class="card p-5 border-2 border-gray-200 hover:shadow-lg transition">
-                                <div class="flex items-start gap-4">
-                                    <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-prescription text-blue-600 text-xl"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <h4 class="font-bold text-gray-900">Jose Rizal Cruz</h4>
-                                            <span class="text-xs text-gray-500">Yesterday, 3:15 PM</span>
-                                        </div>
-                                        <p class="text-sm text-gray-600 mb-2">
-                                            <strong>Rx:</strong> Amoxicillin 500mg - 1 capsule 3x daily (7 days)
-                                        </p>
-                                        <p class="text-xs text-gray-500">Diagnosis: Upper Respiratory Tract Infection</p>
-                                    </div>
-                                    <button onclick="viewPrescription('Jose Rizal Cruz', 'Amoxicillin 500mg')" class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
+                                    <button class="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
                                         View
                                     </button>
                                 </div>
@@ -631,8 +690,193 @@
         </main>
     </div>
 
-    <!-- Modals -->
-    
+    <!-- MODALS -->
+
+    <!-- Create Order Modal -->
+    <div id="createOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">Create X-ray Order</h3>
+                    <p class="text-sm text-gray-500 mt-1">Fill in the details for the diagnostic order</p>
+                </div>
+                <button onclick="closeModal('createOrderModal')" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label class="form-label">Select Patient *</label>
+                    <select id="orderPatient" class="form-select" required>
+                        <option value="">Choose patient...</option>
+                        <option value="Maria Clara Santos|P-2024-001">Maria Clara Santos (P-2024-001)</option>
+                        <option value="Jose Rizal Cruz|P-2024-002">Jose Rizal Cruz (P-2024-002)</option>
+                        <option value="Ana Reyes Dela Cruz|P-2024-003">Ana Reyes Dela Cruz (P-2024-003)</option>
+                        <option value="Pedro Garcia Aquino|P-2024-004">Pedro Garcia Aquino (P-2024-004)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">X-ray Type *</label>
+                    <select id="xrayType" class="form-select" required>
+                        <option value="">Select type...</option>
+                        <option value="Chest X-ray (PA View)">Chest X-ray (PA View)</option>
+                        <option value="Chest X-ray (PA & Lateral)">Chest X-ray (PA & Lateral)</option>
+                        <option value="Lumbar Spine (AP & Lateral)">Lumbar Spine (AP & Lateral)</option>
+                        <option value="Cervical Spine (AP & Lateral)">Cervical Spine (AP & Lateral)</option>
+                        <option value="Skull (AP & Lateral)">Skull (AP & Lateral)</option>
+                        <option value="Abdomen (Supine & Upright)">Abdomen (Supine & Upright)</option>
+                        <option value="Hand (AP & Oblique)">Hand (AP & Oblique)</option>
+                        <option value="Foot (AP & Oblique)">Foot (AP & Oblique)</option>
+                        <option value="Pelvis (AP View)">Pelvis (AP View)</option>
+                        <option value="KUB (Kidneys, Ureters, Bladder)">KUB (Kidneys, Ureters, Bladder)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Clinical Indication *</label>
+                    <textarea id="clinicalIndication" class="form-textarea" rows="3" placeholder="e.g., Chronic cough, rule out pneumonia" required></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select id="orderPriority" class="form-select">
+                            <option value="routine">Routine</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="stat">STAT (Immediate)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred Date</label>
+                        <input type="date" id="preferredDate" class="form-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Additional Instructions (Optional)</label>
+                    <textarea id="additionalInstructions" class="form-textarea" rows="2" placeholder="Any special instructions for the rad tech..."></textarea>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeModal('createOrderModal')" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review Results Modal -->
+    <div id="reviewResultsModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900">Review X-ray Results</h3>
+                    <p class="text-sm text-gray-500 mt-1" id="reviewPatientInfo"></p>
+                </div>
+                <button onclick="closeModal('reviewResultsModal')" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Order Details -->
+                <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-xs text-blue-600 font-bold uppercase mb-1">Order ID</p>
+                            <p class="font-bold text-gray-900" id="reviewOrderId">ORD-2024-001</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-blue-600 font-bold uppercase mb-1">Exam Type</p>
+                            <p class="font-bold text-gray-900" id="reviewExamType">Chest X-ray (PA & Lateral)</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-blue-600 font-bold uppercase mb-1">Completed</p>
+                            <p class="font-bold text-gray-900">Feb 13, 2026 8:15 AM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- X-ray Images -->
+                <div>
+                    <h4 class="text-lg font-bold text-gray-900 mb-3">X-ray Images</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="card p-4">
+                            <p class="text-sm font-bold text-gray-700 mb-2">PA View</p>
+                            <div class="bg-gray-900 rounded-lg flex items-center justify-center" style="height: 300px;">
+                                <div class="text-center text-gray-400">
+                                    <i class="fas fa-x-ray text-6xl mb-3"></i>
+                                    <p class="text-sm">X-ray Image Preview</p>
+                                    <p class="text-xs">(PA View)</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <button class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">
+                                    <i class="fas fa-search-plus mr-1"></i> Zoom
+                                </button>
+                                <button class="flex-1 px-3 py-2 bg-gray-600 text-white text-sm font-bold rounded hover:bg-gray-700">
+                                    <i class="fas fa-download mr-1"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card p-4">
+                            <p class="text-sm font-bold text-gray-700 mb-2">Lateral View</p>
+                            <div class="bg-gray-900 rounded-lg flex items-center justify-center" style="height: 300px;">
+                                <div class="text-center text-gray-400">
+                                    <i class="fas fa-x-ray text-6xl mb-3"></i>
+                                    <p class="text-sm">X-ray Image Preview</p>
+                                    <p class="text-xs">(Lateral View)</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <button class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700">
+                                    <i class="fas fa-search-plus mr-1"></i> Zoom
+                                </button>
+                                <button class="flex-1 px-3 py-2 bg-gray-600 text-white text-sm font-bold rounded hover:bg-gray-700">
+                                    <i class="fas fa-download mr-1"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Radiologist Report (If any) -->
+                <div class="card p-4 bg-gray-50">
+                    <h4 class="text-sm font-bold text-gray-700 mb-2">Rad Tech Notes</h4>
+                    <p class="text-sm text-gray-700">Images acquired successfully. Patient cooperative. Good quality images obtained.</p>
+                </div>
+
+                <!-- Doctor's Interpretation Form -->
+                <form onsubmit="submitInterpretation(event)">
+                    <div class="form-group">
+                        <label class="form-label">Your Findings / Impression *</label>
+                        <textarea id="doctorFindings" class="form-textarea" rows="6" placeholder="Enter your radiological findings and clinical impression..." required></textarea>
+                        <p class="text-xs text-gray-500 mt-1">This will be saved to the patient's medical record</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Recommended Actions</label>
+                        <textarea id="recommendedActions" class="form-textarea" rows="3" placeholder="e.g., Follow-up in 2 weeks, Start antibiotics, Refer to specialist..."></textarea>
+                    </div>
+
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" onclick="closeModal('reviewResultsModal')" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+                            <i class="fas fa-check-circle mr-2"></i> Save Interpretation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Patient Details Modal -->
     <div id="patientModal" class="modal">
         <div class="modal-content">
@@ -651,7 +895,46 @@
         </div>
     </div>
 
-    <!-- Add Schedule Modal -->
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Order Details</h3>
+                <button onclick="closeModal('orderDetailsModal')" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="orderDetailsContent">
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-1">Order ID</p>
+                        <p class="font-bold text-gray-900">ORD-2024-001</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-1">Patient</p>
+                            <p class="font-bold text-gray-900">Maria Clara Santos</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-1">Exam Type</p>
+                            <p class="font-bold text-gray-900">Chest X-ray (PA & Lateral)</p>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs font-bold text-gray-500 uppercase mb-1">Clinical Indication</p>
+                        <p class="text-gray-900">Chronic cough, rule out pneumonia</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal('orderDetailsModal')" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
     <div id="scheduleModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-start mb-6">
@@ -710,51 +993,7 @@
         </div>
     </div>
 
-    <!-- Add Rotation Modal -->
-    <div id="rotationModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-start mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">Add Hospital Rotation</h3>
-                <button onclick="closeModal('rotationModal')" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form onsubmit="saveRotation(event)">
-                <div class="form-group">
-                    <label class="form-label">Hospital Name</label>
-                    <input type="text" class="form-input" placeholder="e.g., Ilocos Training Hospital" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Location/Address</label>
-                    <input type="text" class="form-input" placeholder="e.g., Batac City, Ilocos Norte" required>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="form-group">
-                        <label class="form-label">Start Date</label>
-                        <input type="date" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">End Date</label>
-                        <input type="date" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notes (Optional)</label>
-                    <textarea class="form-input" rows="3" placeholder="Additional information about this rotation..."></textarea>
-                </div>
-                <div class="flex gap-3 mt-6">
-                    <button type="button" onclick="closeModal('rotationModal')" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300">
-                        Cancel
-                    </button>
-                    <button type="submit" class="flex-1 px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
-                        Save Rotation
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Write Prescription Modal -->
+    <!-- Prescription Modal -->
     <div id="prescriptionModal" class="modal">
         <div class="modal-content">
             <div class="flex justify-between items-start mb-6">
@@ -809,20 +1048,30 @@
 
     <script>
         // Tab Navigation
-        function showTab(tabName) {
+        function showTab(tabName, event) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             
             document.getElementById('tab-' + tabName).classList.add('active');
-            event.target.closest('.nav-item').classList.add('active');
+            if (event && event.target) {
+                event.target.closest('.nav-item').classList.add('active');
+            } else {
+                // Fallback: activate the matching nav item by data attribute or text
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    if (item.getAttribute('onclick')?.includes(tabName)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
             
             const titles = {
                 'dashboard': 'Doctor Dashboard',
                 'appointments': 'My Appointments',
+                'diagnostic-orders': 'Diagnostic Orders',
                 'patients': 'My Patients',
                 'approvals': 'Pending Approvals',
                 'schedule': 'My Schedule',
-                'rotation': 'Hospital Rotation',
                 'prescriptions': 'Prescriptions'
             };
             document.getElementById('pageTitle').textContent = titles[tabName];
@@ -835,6 +1084,72 @@
             document.getElementById('successText').textContent = message;
             successMsg.classList.add('show');
             setTimeout(() => successMsg.classList.remove('show'), 5000);
+        }
+
+        // Filter Orders
+        function filterOrders(status, event) {
+            const items = document.querySelectorAll('.order-item');
+            const buttons = document.querySelectorAll('.orders-filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active', 'bg-green-600', 'text-white'));
+            if (event && event.target) {
+                event.target.classList.add('active', 'bg-green-600', 'text-white');
+            }
+            
+            items.forEach(item => {
+                if (status === 'all' || item.dataset.status === status) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Create Order Modal
+        function openCreateOrderModal() {
+            document.getElementById('createOrderModal').classList.add('show');
+        }
+
+        // Submit Order
+        function submitOrder(e) {
+            e.preventDefault();
+            const patient = document.getElementById('orderPatient').value.split('|')[0];
+            const xrayType = document.getElementById('xrayType').value;
+            showSuccess('X-ray order created successfully for ' + patient + '!');
+            closeModal('createOrderModal');
+            // In real app, this would send data to backend
+        }
+
+        // Review Results
+        function reviewResults(orderId, patientName, examType) {
+            document.getElementById('reviewPatientInfo').textContent = patientName + ' - ' + examType;
+            document.getElementById('reviewOrderId').textContent = orderId;
+            document.getElementById('reviewExamType').textContent = examType;
+            document.getElementById('reviewResultsModal').classList.add('show');
+        }
+
+        // Submit Interpretation
+        function submitInterpretation(e) {
+            e.preventDefault();
+            const findings = document.getElementById('doctorFindings').value;
+            if (findings.trim()) {
+                showSuccess('Interpretation saved successfully and added to patient record!');
+                closeModal('reviewResultsModal');
+                // Update order status to "Reviewed"
+                // In real app, this would save to backend
+            }
+        }
+
+        // View Order Details
+        function viewOrderDetails(orderId) {
+            document.getElementById('orderDetailsModal').classList.add('show');
+        }
+
+        // Cancel Order
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                showSuccess('Order ' + orderId + ' has been cancelled.');
+            }
         }
 
         // Start Consultation
@@ -920,26 +1235,6 @@
             closeModal('scheduleModal');
         }
 
-        function editScheduleEntry(day) {
-            showSuccess('Opening schedule editor for ' + day + '...');
-        }
-
-        function deleteScheduleEntry(day) {
-            if (confirm('Delete schedule for ' + day + '?')) {
-                showSuccess('Schedule for ' + day + ' deleted.');
-            }
-        }
-
-        function addRotation() {
-            document.getElementById('rotationModal').classList.add('show');
-        }
-
-        function saveRotation(e) {
-            e.preventDefault();
-            showSuccess('Hospital rotation added successfully!');
-            closeModal('rotationModal');
-        }
-
         function writePrescription() {
             document.getElementById('prescriptionModal').classList.add('show');
         }
@@ -950,8 +1245,8 @@
             closeModal('prescriptionModal');
         }
 
-        function viewPrescription(patient, medication) {
-            showSuccess('Viewing prescription for ' + patient);
+        function showNotifications() {
+            alert('Notifications:\n\n• 3 X-ray results ready for review\n• 1 urgent order pending\n• 2 new patient messages');
         }
 
         function closeModal(modalId) {
@@ -963,6 +1258,14 @@
                 event.target.classList.remove('show');
             }
         }
+
+        // Initialize filter buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const allBtn = document.querySelector('[data-filter="all"]');
+            if (allBtn) {
+                allBtn.classList.add('bg-green-600', 'text-white');
+            }
+        });
     </script>
 </body>
 </html>
