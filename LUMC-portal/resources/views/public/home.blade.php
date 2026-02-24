@@ -47,7 +47,7 @@
         <div class="w-full px-6 py-3 flex flex-row items-center justify-between border-b border-gray-100">
 
             <div class="flex items-center gap-3">
-                <img src="{{ asset('images/LUMC_LOGO.png') }}" alt="logo" class="w-14 h-14">
+                <img src="{{ asset('images/lumc-logo.png') }}" alt="logo" class="w-14 h-14">
                 <h1 class="text-lg md:text-xl font-bold text-blue-900 leading-tight">
                     LA UNION MEDICAL CENTER
                 </h1>

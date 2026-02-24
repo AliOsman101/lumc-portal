@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\RadiologyRequestController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -40,16 +42,28 @@ Route::get('/test/register', function () {
     return view('auth.register');
 })->name('test.register');
 
-// Auth Routes (login, register, etc.) are handled by Breeze/Laravel
+Route::get('/test/pews', function () {
+    return view('pews');
+})->name('test.pews');
+
+
+Route::get('/test/radiology/request', function () {
+    return view('radiology.request');
+})->name('test.radiology.request');
+
+Route::get('/test/nutrition/request', function () {
+    return view('nutrition.request');
+})->name('test.nutrition.request');
+
 
 // Role-Based Dashboard Routes (WITH AUTHENTICATION)
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // Redirect to appropriate dashboard based on role
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        
-        return match($user->role) {
+
+        return match ($user->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'doctor' => redirect()->route('doctor.dashboard'),
             'nurse' => redirect()->route('nurse.dashboard'),
@@ -86,10 +100,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('dashboard');
     });
 
+    Route::get('/pews', function () {
+        return view('pews');
+    });
+
+    // Radiology request form (authenticated)
+    Route::get('/radiology/request', [RadiologyRequestController::class, 'create'])->name('radiology.request.create');
+    Route::post('/radiology/request', [RadiologyRequestController::class, 'store'])->name('radiology.request.store');
+    Route::get('/radiology/patient', [RadiologyRequestController::class, 'findPatient'])->name('radiology.patient.find');
+
+    // Nutrition request form (authenticated)
+    Route::get('/nutrition/request', [\App\Http\Controllers\NutritionRequestController::class, 'create'])->name('nutrition.request.create');
+    Route::post('/nutrition/request', [\App\Http\Controllers\NutritionRequestController::class, 'store'])->name('nutrition.request.store');
+
+
     // Profile Routes (accessible by all authenticated users)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
