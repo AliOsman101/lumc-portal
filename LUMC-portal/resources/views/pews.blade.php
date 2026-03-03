@@ -84,27 +84,27 @@
         <div class="mb-4 bg-white rounded-xl shadow-sm border border-slate-200 p-4">
             <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Last name</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Last name</label>
                     <input id="patient-last" type="text" class="w-full mt-1 p-2 border rounded text-sm"
                         placeholder="Last name">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Given name</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Given name</label>
                     <input id="patient-given" type="text" class="w-full mt-1 p-2 border rounded text-sm"
                         placeholder="Given name">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Ward</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Ward</label>
                     <input id="patient-ward" type="text" class="w-full mt-1 p-2 border rounded text-sm"
                         placeholder="Ward">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Age</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Age</label>
                     <input id="patient-age" type="text" class="w-full mt-1 p-2 border rounded text-sm"
                         placeholder="Age">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Sex</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Sex</label>
                     <select id="patient-sex" class="w-full mt-1 p-2 border rounded text-sm">
                         <option value="">--</option>
                         <option>Male</option>
@@ -113,7 +113,7 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-600">Hospital #</label>
+                    <label class="text-[10px] ml-2 font-bold text-slate-600">Hospital #</label>
                     <input id="patient-hn" type="text" class="w-full mt-1 p-2 border rounded text-sm"
                         placeholder="Hospital number">
                 </div>
@@ -132,7 +132,7 @@
                                     <input type="text" placeholder="Date"
                                         class="w-full bg-transparent border-none text-center text-[9px] mb-1 focus:ring-0 placeholder-slate-400">
                                     <input type="time" class="time-header w-full bg-transparent border-none text-center text-[9px] font-bold
-                                               text-indigo-100 focus:ring-0">
+                                                   text-indigo-100 focus:ring-0">
                                 </th>
                             @endfor
                         </tr>

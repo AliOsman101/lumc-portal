@@ -242,8 +242,8 @@
                                 <h2 class="font-semibold text-sm mb-2 mt-2 ">Others:</h2>
                                 <div class="grid grid-cols-2 gap-2">
                                     <input name="BP:" class="p-2 border rounded w-full" placeholder="Blood Pressure">
-                                    <input name="Acid Base Gas" class="p-2 border rounded w-full"
-                                        placeholder="Acid Base Gas">
+                                    <input name="Acid Base Gas (ABG)" class="p-2 border rounded w-full"
+                                        placeholder="Acid Base Gas (ABG)">
                                 </div>
                             </div>
                         </td>
@@ -251,8 +251,71 @@
                 </tbody>
             </table>
 
+            <table class="w-full border-collapse text-sm mb-4">
+                <tr>
+                    <th colspan="2" class="border p-3 text-center font-semibold text-sm bg-gray-50">
+                        Scoring Nutritional Risk Related Factors
+                    </th>
+                </tr>
 
-        
+                <tr>
+                    <td class="align-top border p-4" style="width:66%">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="grid grid-cols-1 gap-2 mt-2 text-sm">
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="screening_criteria" class="mr-2">Screening
+                                        criteria for potential nutritional risk (1 point)</label>
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="percent_ibw" class="mr-2">&lt;85% or &gt;130%
+                                        Ideal Body Weight (1 point)</label>
+                                    <div>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" name="nutrition_risk[]" value="unintentional_weight_loss" class="mr-2">
+                                            Unintentional weight loss (2 points)
+                                        </label>
+
+                                        <div id="unintentionalWeightDetails" style="display:none" class="flex items-center space-x-2 mt-1 ml-6 text-sm">
+                                            <input type="number" name="unintentional_weight_loss_percent" min="0" max="100" step="0.1" placeholder="%" class="w-20 p-1 border rounded">
+                                            <span>% over</span>
+                                            <input type="number" name="unintentional_weight_loss_duration" min="0" step="1" placeholder="0" class="w-20 p-1 border rounded">
+                                            <select name="unintentional_weight_loss_duration_unit" class="p-1 border rounded">
+                                                <option value="weeks">weeks</option>
+                                                <option value="months">months</option>
+                                            </select>
+                                            <p id="unintentionalError" class="ml-2 text-xs text-red-600" style="display:none">Enter % and duration.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="grid grid-cols-1 gap-2 mt-2 text-sm">
+
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="mechanical_digestive" class="mr-2">Mechanical
+                                        / Digestive Problem (1
+                                        point)</label>
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="low_albumin" class="mr-2">Low Albumin (1
+                                        point)</label>
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="significant_lab" class="mr-2">Significant Lab
+                                        Result (1 point)</label>
+                                    <label class="inline-flex items-center"><input type="checkbox"
+                                            name="nutrition_risk[]" value="others" class="mr-2">Others (1 point)</label>
+
+                                    <div class="mt-2">
+                                        <label class="block text-xs font-semibold text-slate-600">Total Points</label>
+                                        <input type="number" id="nutritionRiskTotal" name="nutrition_risk_total" min="0" readonly
+                                            class="mt-1 w-24 p-2 border rounded bg-slate-100" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
 
             <div class="mb-4 thin-border p-3 text-sm">
                 <h3 class="font-semibold mb-2">Nutrition Diagnosis & Intervention</h3>
@@ -319,7 +382,7 @@
                 <button type="button" onclick="window.print()" class="px-4 py-2 bg-indigo-600 text-white rounded">Print
                     / Export PDF</button>
                 <button type="button" id="clearBtn" class="px-4 py-2 bg-slate-200 rounded">Clear</button>
-                <button type="button" class="px-4 py-2 bg-emerald-600 text-white rounded">Save</button>
+                <button type="button" id="saveBtn" class="px-4 py-2 bg-emerald-600 text-white rounded">Save</button>
             </div>
         </form>
     </div>
@@ -328,6 +391,88 @@
         document.getElementById('clearBtn')?.addEventListener('click', () => {
             const form = document.querySelector('form');
             if (form) form.reset();
+            // ensure total resets visually
+            const total = document.getElementById('nutritionRiskTotal');
+            if (total) total.value = '';
+            // hide weight details when cleared
+            const details = document.getElementById('unintentionalWeightDetails');
+            if (details) details.style.display = 'none';
+        });
+
+        // Points mapping for nutrition risk checkboxes
+        const NUTRITION_RISK_POINTS = {
+            screening_criteria: 1,
+            percent_ibw: 1,
+            unintentional_weight_loss: 2,
+            mechanical_digestive: 1,
+            low_albumin: 1,
+            significant_lab: 1,
+            others: 1
+        };
+
+        function computeNutritionRiskTotal() {
+            const totalInput = document.getElementById('nutritionRiskTotal');
+            if (!totalInput) return;
+            const checkboxes = Array.from(document.querySelectorAll('input[name="nutrition_risk[]"]'));
+            let sum = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const val = cb.value;
+                    if (NUTRITION_RISK_POINTS.hasOwnProperty(val)) {
+                        sum += Number(NUTRITION_RISK_POINTS[val]) || 0;
+                    }
+                }
+            });
+            totalInput.value = sum;
+        }
+
+        function toggleUnintentionalDetails() {
+            const cb = document.querySelector('input[name="nutrition_risk[]"][value="unintentional_weight_loss"]');
+            const details = document.getElementById('unintentionalWeightDetails');
+            if (!details || !cb) return;
+            details.style.display = cb.checked ? 'flex' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // initialize
+            toggleUnintentionalDetails();
+            computeNutritionRiskTotal();
+
+            // listen to nutrition risk checkboxes
+            const checkboxes = Array.from(document.querySelectorAll('input[name="nutrition_risk[]"]'));
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.value === 'unintentional_weight_loss') toggleUnintentionalDetails();
+                    computeNutritionRiskTotal();
+                });
+            });
+
+            // Save handler: validate unintentional weight loss details when checked
+            const saveBtn = document.getElementById('saveBtn');
+            const form = document.querySelector('form');
+            if (saveBtn && form) {
+                saveBtn.addEventListener('click', (e) => {
+                    const unintentionalCb = document.querySelector('input[name="nutrition_risk[]"][value="unintentional_weight_loss"]');
+                    const percentInput = document.querySelector('input[name="unintentional_weight_loss_percent"]');
+                    const durationInput = document.querySelector('input[name="unintentional_weight_loss_duration"]');
+                    const errorEl = document.getElementById('unintentionalError');
+
+                    if (unintentionalCb && unintentionalCb.checked) {
+                        const pct = percentInput ? Number(percentInput.value) : 0;
+                        const dur = durationInput ? Number(durationInput.value) : 0;
+                        if (!pct || pct <= 0 || !dur || dur <= 0) {
+                            // invalid
+                            if (errorEl) errorEl.style.display = 'inline';
+                            if (percentInput && (!pct || pct <= 0)) percentInput.focus();
+                            return; // prevent save
+                        }
+                        if (errorEl) errorEl.style.display = 'none';
+                    }
+
+                    // All validations passed — submit form (will follow default behaviour)
+                    form.submit();
+                });
+            }
         });
     </script>
 </body>
