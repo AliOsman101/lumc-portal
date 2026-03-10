@@ -4,7 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RadiologyRequestController;
-
+use App\Http\Controllers\LaboratoryController;
+use App\Http\Controllers\NutritionRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,49 +13,32 @@ use App\Http\Controllers\RadiologyRequestController;
 |--------------------------------------------------------------------------
 */
 
-// Public Routes
 Route::get('/', function () {
     return view('public.home');
 })->name('home');
 
-// ⚡ DIRECT ACCESS ROUTES (NO LOGIN REQUIRED - FOR TESTING ONLY)
-Route::get('/test/patient', function () {
-    return view('patient.dashboard');
-})->name('test.patient');
+/**
+ * Direct-access routes (no login) for UI testing.
+ * Enabled only in local environment.
+ */
+if (app()->isLocal()) {
+    Route::prefix('test')->name('test.')->group(function () {
+        Route::view('/login', 'auth.login')->name('login');
+        Route::view('/register', 'auth.register')->name('register');
 
-Route::get('/test/doctor', function () {
-    return view('doctor.dashboard');
-})->name('test.doctor');
+        Route::view('/admin', 'admin.dashboard')->name('admin');
+        Route::view('/doctor', 'doctor.dashboard')->name('doctor');
+        Route::view('/nurse', 'nurse.dashboard')->name('nurse');
+        Route::view('/patient', 'patient.dashboard')->name('patient');
 
-Route::get('/test/nurse', function () {
-    return view('nurse.dashboard');
-})->name('test.nurse');
-
-Route::get('/test/admin', function () {
-    return view('admin.dashboard');
-})->name('test.admin');
-
-Route::get('/test/login', function () {
-    return view('auth.login');
-})->name('test.login');
-
-Route::get('/test/register', function () {
-    return view('auth.register');
-})->name('test.register');
-
-Route::get('/test/pews', function () {
-    return view('pews');
-})->name('test.pews');
-
-
-Route::get('/test/radiology/request', function () {
-    return view('radiology.request');
-})->name('test.radiology.request');
-
-Route::get('/test/nutrition/request', function () {
-    return view('nutrition.request');
-})->name('test.nutrition.request');
-
+        Route::view('/nursing_services/pews', 'nursing_services.pews')->name('nursing_services.pews');
+        Route::view('/radiology/request', 'radiology.request')->name('radiology.request');
+        Route::view('/nutrition_dietetics/request', 'nutrition_dietetics.request')->name('nutrition.request');
+        Route::view('/clinical_laboratory/request', 'clinical_laboratory.request')->name('clinical_laboratory.request');
+        Route::view('/nursing_services/red_monitoring_checklist', 'nursing_services.red_monitoring_checklist')->name('nursing_services.red_monitoring_checklist');
+        Route::view('/nursing_services/nfaprep', 'nursing_services.nfaprep')->name('nursing_services.nfaprep');
+    });
+}
 
 // Role-Based Dashboard Routes (WITH AUTHENTICATION)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -100,9 +84,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('dashboard');
     });
 
-    Route::get('/pews', function () {
-        return view('pews');
-    });
+    Route::view('/nursing_services/pews', 'nursing_services.pews')->name('nursing_services.pews');
+    Route::view('/nursing_services/nfaprep', 'nursing_services.nfaprep')->name('nursing_services.nfaprep');
 
     // Radiology request form (authenticated)
     Route::get('/radiology/request', [RadiologyRequestController::class, 'create'])->name('radiology.request.create');
@@ -110,9 +93,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/radiology/patient', [RadiologyRequestController::class, 'findPatient'])->name('radiology.patient.find');
 
     // Nutrition request form (authenticated)
-    Route::get('/nutrition/request', [\App\Http\Controllers\NutritionRequestController::class, 'create'])->name('nutrition.request.create');
-    Route::post('/nutrition/request', [\App\Http\Controllers\NutritionRequestController::class, 'store'])->name('nutrition.request.store');
+    Route::get('/nutrition_dietetics/request', [NutritionRequestController::class, 'create'])->name('nutrition.request.create');
+    Route::post('/nutrition_dietetics/request', [NutritionRequestController::class, 'store'])->name('nutrition.request.store');
 
+    // Clinical Laboratory request form (authenticated)
+    Route::get('/clinical_laboratory/request', [LaboratoryController::class, 'create'])->name('laboratory.request.create');
+    Route::post('/clinical_laboratory/request', [LaboratoryController::class, 'store'])->name('laboratory.request.store');
+    Route::get('/clinical_laboratory/request/{laboratoryRequest}/print', [LaboratoryController::class, 'print'])->name('laboratory.request.print');
 
     // Profile Routes (accessible by all authenticated users)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
