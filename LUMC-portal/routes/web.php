@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NurseNoteController;
 use App\Http\Controllers\MedicationRecordController;
 use App\Http\Controllers\NutritionScreeningController;
+use App\Http\Controllers\PatientHistoryController;
+use App\Http\Controllers\PhysicalExamController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +90,26 @@ Route::prefix('nurse')->name('nurse.')->group(function () {
     })->name('patient-history');
 });
 
+
+Route::get('/nurse/vital-signs', function () {
+    return view('nurse.vital-signs');
+});
+
+Route::post('/nurse/vital-signs', function () {
+    return back()->with('success','Saved!');
+});
+
+// SHOW PAGE (GET)
+Route::get('/nurse/tpr-record', function () {
+    return view('nurse.tpr-record');
+});
+
+// OPTIONAL: SAVE DATA (POST)
+Route::post('/nurse/tpr-record', function () {
+    return back()->with('success', 'Saved!');
+});
+
+
 // // Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
 //     Route::get('/nutrition-screening/pedia', [NutritionScreeningController::class, 'create'])->name('nutrition.create');
 //     Route::post('/nutrition-screening/pedia', [NutritionScreeningController::class, 'store'])->name('nutrition.store');
@@ -104,3 +126,15 @@ Route::prefix('nurse')->name('nurse.')->group(function () {
 // });
 // ✅ Auth routes (login/register)
 require __DIR__.'/auth.php';
+
+
+
+// Route::prefix('nurse')->group(function () {
+
+//     Route::get('/patient-history', [PatientHistoryController::class, 'create']);
+//     Route::post('/patient-history', [PatientHistoryController::class, 'store']);
+
+//     Route::get('/physical-exam', [PhysicalExamController::class, 'create']);
+//     Route::post('/physical-exam', [PhysicalExamController::class, 'store']);
+
+// });
