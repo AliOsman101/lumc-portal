@@ -1,0 +1,11 @@
+Nursing Services
+Pediatric Early Warning Score (PEWS)	http://localhost:8000/test/nursing_services/pews
+RED Monitoring Checklist	http://localhost:8000/test/nursing_services/red_monitoring_checklist
+NFA Preparation	http://localhost:8000/test/nursing_services/nfaprep
+Nursing Early Warning Score (NEWS) http://localhost:8000/test/nursing_services/news
+Pediatric http://localhost:8000/test/nursing_services/pediatric
+
+Medical Request Forms
+Radiology Request	http://localhost:8000/test/radiology/request
+Nutrition Dietetics Request	http://localhost:8000/test/nutrition_dietetics/request
+Clinical Laboratory Request	http://localhost:8000/test/clinical_laboratory/request

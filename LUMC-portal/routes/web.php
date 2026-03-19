@@ -37,6 +37,8 @@ if (app()->isLocal()) {
         Route::view('/clinical_laboratory/request', 'clinical_laboratory.request')->name('clinical_laboratory.request');
         Route::view('/nursing_services/red_monitoring_checklist', 'nursing_services.red_monitoring_checklist')->name('nursing_services.red_monitoring_checklist');
         Route::view('/nursing_services/nfaprep', 'nursing_services.nfaprep')->name('nursing_services.nfaprep');
+        Route::view('/nursing_services/news', 'nursing_services.news')->name('nursing_services.news');
+        Route::view('/nursing_services/pediatric', 'nursing_services.pediatric')->name('nursing_services.pediatric');
     });
 }
 
@@ -86,7 +88,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::view('/nursing_services/pews', 'nursing_services.pews')->name('nursing_services.pews');
     Route::view('/nursing_services/nfaprep', 'nursing_services.nfaprep')->name('nursing_services.nfaprep');
-
+    Route::view('/nursing_services/news', 'nursing_services.news')->name('nursing_services.news');
+    
     // Radiology request form (authenticated)
     Route::get('/radiology/request', [RadiologyRequestController::class, 'create'])->name('radiology.request.create');
     Route::post('/radiology/request', [RadiologyRequestController::class, 'store'])->name('radiology.request.store');
