@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NurseNoteController;
 use App\Http\Controllers\MedicationRecordController;
+use App\Http\Controllers\NutritionScreeningController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,52 @@ Route::prefix('nurse')->name('nurse.')->group(function () {
     Route::get('/medication-records', [MedicationRecordController::class, 'create'])->name('medication.records');
     Route::post('/medication-records', [MedicationRecordController::class, 'store'])->name('medication.records.store');
 });
+
+Route::prefix('nurse')->name('nurse.')->group(function () {
+// Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
+    Route::get('/nutrition-screening', [NutritionScreeningController::class, 'create'])->name('nutrition.create');
+    Route::post('/nutrition-screening', [NutritionScreeningController::class, 'store'])->name('nutrition.store');
+});
+
+Route::prefix('nurse')->name('nurse.')->group(function () {
+
+    Route::get('/fall-scale', function () {
+        return view('nurse.fall-scale');
+    })->name('fall-scale');
+
+    Route::get('/safety-checklist', function () {
+        return view('nurse.safety-checklist');
+    })->name('safety-checklist');
+
+});
+
+Route::prefix('nurse')->name('nurse.')->group(function () {
+
+    Route::get('/react-to-red', function () {
+        return view('nurse.react-red');
+    })->name('react-red');
+
+});
+
+Route::get('/nurse/humpty-dumpty', function () {
+    return view('nurse.humpty');
+}); 
+
+
+Route::prefix('nurse')->name('nurse.')->group(function () {
+    Route::get('/physical-exam', function () {
+        return view('nurse.physical-exam');
+    })->name('physical-exam');
+
+    Route::get('/patient-history', function () {
+        return view('nurse.patient-history');
+    })->name('patient-history');
+});
+
+// // Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
+//     Route::get('/nutrition-screening/pedia', [NutritionScreeningController::class, 'create'])->name('nutrition.create');
+//     Route::post('/nutrition-screening/pedia', [NutritionScreeningController::class, 'store'])->name('nutrition.store');
+// });
 
 // Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
 //     // existing nurse notes routes...
