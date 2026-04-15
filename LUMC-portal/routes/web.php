@@ -109,6 +109,25 @@ Route::post('/nurse/tpr-record', function () {
     return back()->with('success', 'Saved!');
 });
 
+Route::get('/nurse/admission-discharge', function () {
+    return view('nurse.admission-discharge');
+});
+
+Route::post('/nurse/admission-discharge', function () {
+    return back()->with('success','Saved!');
+});
+
+Route::get('/nurse/medicationrecords', function () {
+    return view('nurse.medication-records');
+});
+
+Route::post('/nurse/medicationrecords', function () {
+    return back()->with('success','Saved!');
+});
+
+Route::get('/nurse/triage', function () {
+    return view('nurse.triage');
+});
 
 // // Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
 //     Route::get('/nutrition-screening/pedia', [NutritionScreeningController::class, 'create'])->name('nutrition.create');

@@ -675,6 +675,7 @@
 
         <div class="actions">
             <button type="button" class="btn btn-secondary" onclick="window.print()">Print</button>
+          
             <button type="button" class="btn" onclick="alert('Demo only: saving to database next step 😅')">Save</button>
         </div>
 
