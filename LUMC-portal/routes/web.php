@@ -127,6 +127,10 @@ Route::post('/nurse/medicationrecords', function () {
 
 Route::get('/nurse/triage', function () {
     return view('nurse.triage');
+    });
+
+ Route::get('/nurse/dashboard', function () {
+    return view('nurse.dashboard');
 });
 
 // // Route::middleware('auth')->prefix('nurse')->name('nurse.')->group(function () {
